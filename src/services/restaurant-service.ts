@@ -1,36 +1,71 @@
-import { prisma } from "../index";
-import { CreateRestaurantRequest, UpdateRestaurantRequest } from "../models/restaurant-model";
+import { prismaClient } from "../utils/database-util";
+import {
+  CreateRestaurantRequest,
+  UpdateRestaurantRequest,
+} from "../models/restaurant-model";
+import { RestaurantValidation } from "../validations/restaurant-validation";
+import { Validation } from "../validations/validation";
+import { ResponseError } from "../errors/response-error";
 
 export class RestaurantService {
+  static async create(request: CreateRestaurantRequest) {
+    const createRequest = Validation.validate(
+      RestaurantValidation.CREATE,
+      request
+    );
 
-    static async create(request: CreateRestaurantRequest) {
-        return await prisma.restaurant.create({
-            data: {
-                name        : request.name,
-                description : request.description,
-                isOpen      : request.isOpen ?? true // Kalau tidak diisi, default True (Buka)
-            }
-        });
+    const record = await prismaClient.restaurant.create({
+      data: {
+        name: createRequest.name,
+        description: createRequest.description,
+        isOpen: createRequest.isOpen ?? true,
+      },
+    });
+
+    return record;
+  }
+
+  static async getAll(isOpen?: boolean) {
+    return await prismaClient.restaurant.findMany({
+      where: isOpen !== undefined ? { isOpen } : {},
+    });
+  }
+
+  static async update(request: UpdateRestaurantRequest) {
+    const updateRequest = Validation.validate(
+      RestaurantValidation.UPDATE,
+      request
+    );
+
+    const restaurant = await prismaClient.restaurant.findUnique({
+      where: { id: updateRequest.id },
+    });
+
+    if (!restaurant) {
+      throw new ResponseError(404, "Restaurant not found");
     }
 
-    static async getAll() {
-        return await prisma.restaurant.findMany();
+    return await prismaClient.restaurant.update({
+      where: { id: updateRequest.id },
+      data: {
+        name: updateRequest.name,
+        description: updateRequest.description,
+        isOpen: updateRequest.isOpen,
+      },
+    });
+  }
+
+  static async delete(id: number) {
+    const restaurant = await prismaClient.restaurant.findUnique({
+      where: { id: id },
+    });
+
+    if (!restaurant) {
+      throw new ResponseError(404, "Restaurant not found");
     }
 
-    static async update(request: UpdateRestaurantRequest) {
-        return await prisma.restaurant.update({
-            where: { id: request.id },
-            data: {
-                name        : request.name,
-                description : request.description,
-                isOpen      : request.isOpen
-            }
-        });
-    }
-
-    static async delete(id: number) {
-        return await prisma.restaurant.delete({
-            where: { id: id }
-        });
-    }
+    return await prismaClient.restaurant.delete({
+      where: { id: id },
+    });
+  }
 }

@@ -3,20 +3,22 @@ import { CustomerController } from '../controllers/customer-controller';
 import { RestaurantController } from '../controllers/restaurant-controller';
 import { OrderController } from '../controllers/order-controller';
 
-const router = express.Router();
+export const router = express.Router();
 
-//Customer
+//customer
 router.post('/customers', CustomerController.create);
 router.get('/customers', CustomerController.getAll);
+router.get('/customers/:id', CustomerController.getById)
+router.patch('/customers/:id', CustomerController.update);
+router.delete('/customers/:id', CustomerController.delete)
 
-//Restaurant
+//restaurant
 router.post('/restaurants', RestaurantController.create);
 router.get('/restaurants', RestaurantController.getAll);
 router.patch('/restaurants/:id', RestaurantController.update); 
 router.delete('/restaurants/:id', RestaurantController.delete);
 
-//Order
+//order
 router.post('/orders', OrderController.create);
 router.get('/orders', OrderController.getAll);
-
-export default router;
+;

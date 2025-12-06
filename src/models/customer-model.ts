@@ -1,10 +1,15 @@
-export type CreateCustomerRequest = {
+export interface CreateCustomerRequest {
+    name    : string;
+    phone   : string;
+}
+export interface CustomerResponse {
+    id      : number;
     name    : string;
     phone   : string;
 }
 
-export type CustomerResponse = {
+export interface UpdateCustomerRequest {
     id      : number;
-    name    : string;
-    phone   : string;
+    name?   : string;
+    phone?  : string;
 }
